@@ -1,30 +1,50 @@
 var app = require('http').createServer(handler),
 io  = require('socket.io').listen(app),
 fs  = require('fs');
+var path = require('path');
 
 app.listen(3000);
 
 var CONTENT_TYPE = "text/plain";
 var FILE_NAME = "";
 
-function handler (req, res) {
-  var file_ext = getFileType(req.url);
-  FILE_NAME = req.url;
+function handler(request, response) {
 
-  setContentType(file_ext);
-  setFileName(req.url);
-  console.log(FILE_NAME + ' - ' + CONTENT_TYPE);
+  var filePath = '.' + request.url;
+  if (filePath == './')
+    filePath = './index.html';
 
-  fs.readFile(__dirname + FILE_NAME, 'utf-8',
-              function (err, data) {
-                if (err) {
-                  res.writeHead(500);
-                  return res.end('Error loading index.html');
-                }
+  var extname = path.extname(filePath);
+  var contentType = 'text/html';
+  switch (extname) {
+    case '.js':
+      contentType = 'text/javascript';
+    break;
+    case '.css':
+      contentType = 'text/css';
+    break;
+  }
 
-                res.writeHead(200, {'Content-Type' : CONTENT_TYPE});
-                res.end(data);
-              });
+  path.exists(filePath, function(exists) {
+
+    if (exists) {
+      fs.readFile(filePath, function(error, content) {
+        if (error) {
+          response.writeHead(500);
+          response.end();
+        }
+        else {
+          response.writeHead(200, { 'Content-Type': contentType });
+          response.end(content, 'utf-8');
+        }
+      });
+    }
+    else {
+      response.writeHead(404);
+      response.end();
+    }
+  });
+
 }
 
 
@@ -36,26 +56,3 @@ io.sockets.on('connection', function (socket) {
 
   socket.on('disconnect', function () { });
 });
-
-
-function getFileType(filename){
-  var re = /(?:\.([^.]+))?$/;
-  var ext = re.exec(filename);
-  return ext[ext.length -1];
-}
-function setContentType(file_ext){
-  if(file_ext == "js"){
-    CONTENT_TYPE = "text/javascript";
-  }else if(file_ext == "css"){
-    CONTENT_TYPE = "text/css";
-  }else{
-    CONTENT_TYPE = "text/html";
-  }
-}
-function setFileName(url){
-  if(url == "/"){
-    FILE_NAME = '/client/index.html';
-  }else{
-    FILE_NAME = url;
-  }
-}
