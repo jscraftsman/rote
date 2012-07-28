@@ -13,6 +13,7 @@ function handler (req, res) {
 
   setContentType(file_ext);
   setFileName(req.url);
+  console.log(FILE_NAME + ' - ' + CONTENT_TYPE);
 
   fs.readFile(__dirname + FILE_NAME, 'utf-8',
               function (err, data) {
