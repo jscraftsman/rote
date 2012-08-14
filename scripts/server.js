@@ -48,10 +48,17 @@ function handler(request, response) {
 }
 
 
+var CLIENTS = [];
+
 io.sockets.on('connection', function (socket) {
+  //socket.on('message', function () { });
 
-  socket.on('message', function () { });
-
+  socket.on('addUser', function(data){
+    socket.username = data;
+    CLIENTS.push(data);
+    socket.emit('updateClientList', data);
+    io.sockets.emit('setClientList', CLIENTS);
+  });
 
 
   socket.on('disconnect', function () { });

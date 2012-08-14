@@ -1,25 +1,40 @@
 <html>
-    <head>
-        <title>Rockin' Page</title>
-        <link type="text/css" rel="stylesheet" href="style.css" />
-        <script type="text/javascript" src="jquery-1.7.2.min.js"></script>
-        <script src="/socket.io/socket.io.js"></script>
-        </head>
-    <body>
-        <p>This is a page. For realz, yo.</p>
-    </body>
-    <script type="text/javascript">
-      var socket = io.connect('http://localhost:3000');
-      socket.on('connect', function () {
+  <head>
+    <title>Rockin' Page</title>
+    <link type="text/css" rel="stylesheet" href="css/style.css" />
+    <script type="text/javascript" src="scripts/jquery-1.7.2.min.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
+  </head>
+  <body>
 
-          socket.on('message', function (msg) {
-            // my msg
-            });
-          });
+    <div id="client_list">
+      <h3>Client List</h3>
+      <ul></ul>
+    </div>
 
+  </body>
+  <script type="text/javascript">
+    var socket = io.connect('http://localhost:3000');
+    socket.on('connect', function () {
+       // socket.on('message', function (msg) {  });
+        socket.emit('addUser', prompt("Enter name:"));
 
-        $(document).ready(function() {
-            alert('happenin');
+        socket.on('setClientList', function(data) {
+         $("div#client_list ul").empty();
+          for(var i = 0; i < data.length; i++){
+            $("div#client_list ul").append("<li>" + data[i] + "</li>");
+          } 
         });
-    </script>
+
+        socket.on('updateClientList', function(data){
+          $("div#client_list ul").append("<li>" + data + "</li>");
+        });
+
+
+    });
+
+    $(document).ready(function() {
+    });
+
+</script>
 </html>
